@@ -1,0 +1,14 @@
+{
+  "name": "s86_pet-crazy-moments",
+  "version": "1.0.0",
+  "description": "The Pet Crazy: Fun & Viral Pet Moments project is a whimsical platform where users can create profiles for their pets, share their pets' adventures, and connect with other pet enthusiasts. The goal is to build a lighthearted community where users can celebrate their pets' unique personalities and share funny and viral moments.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
+}
