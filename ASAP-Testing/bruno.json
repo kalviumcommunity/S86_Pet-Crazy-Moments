@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "ASAP-Testing",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
