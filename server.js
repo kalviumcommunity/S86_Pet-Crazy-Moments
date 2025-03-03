@@ -10,6 +10,11 @@ mongoose.connect(process.env.MongoDB_URI,{})
 .then(()=>console.log('Mongodb is connected'))
 .catch((err)=>console.log("Mongodb connection failed",err))
 
+//connecting api routers
+app.use(express.json())
+const router = require('./routes/router')
+app.use('/users', router);
+
 
 app.get('/ping', (req, res) => {
     res.send('pong');
