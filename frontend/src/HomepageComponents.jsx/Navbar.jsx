@@ -15,13 +15,13 @@ const Navbar = () => {
             Home
           </a>
           <a
-            href="#about"
+            href="/#about"
             className="text-gray-200 text-lg font-medium hover:text-green-300 transition-all duration-300 ease-in-out"
           >
             About
           </a>
           <a
-            href="#contact"
+            href="/#contact"
             className="text-gray-200 text-lg font-medium hover:text-green-300 transition-all duration-300 ease-in-out"
           >
             Contact

@@ -7,9 +7,9 @@ const Showcase = () => {
     <div>
       <section
         id="Showcase"
-        className="flex flex-wrap gap-20 min-h-150 items-center justify-center text-center py-20 bg-gray-900 text-white"
+        className="flex flex-wrap gap-20 min-h-150 items-center justify-center text-center py-25 bg-gray-900 text-white"
       >
-        <div className="relative ml-10 shrink-1">
+        <div className="relative">
           <div className="p-5 rotate-3 bg-white w-80 shadow-2xl shadow-gray-400 ">
             <img
               src="https://ii1.pepperfry.com/assets/46b9f9_1676556007597_Pets_1280_nocompanionlikeacat_16feb_3.jpg"
