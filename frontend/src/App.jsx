@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import {Home, Login, Signup, Images, Video, Upload} from './Routes.jsx';
+import {Home, Login, Signup, ImagePage, VideoPage, UploadPage, Admin} from './Routes.jsx';
 
 
 function App() {
@@ -9,9 +9,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/image" element={<Images />} />
-        <Route path="/video" element={<Video />} />
-        <Route path="/upload" element={<Upload />} />
+        <Route path="/image" element={<ImagePage />} />
+        <Route path="/video" element={<VideoPage />} />
+        <Route path="/upload" element={<UploadPage />} />
+        <Route path='/admin' element={<Admin/>} />
 
       </Routes>
     </BrowserRouter>

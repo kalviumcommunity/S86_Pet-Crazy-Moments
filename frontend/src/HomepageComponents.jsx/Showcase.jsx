@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Showcase = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   return (
     <div>
       <section
@@ -29,15 +38,14 @@ const Showcase = () => {
             Share and discover adorable and funny pet moments.
           </p>
           <button
-            onClick={() => navigate('/signup')}
-            className="bg-green-400 cursor-pointer text-black font-semibold  px-6 py-3 rounded-2xl transition-all duration-300 hover:bg-yellow-500"
+            onClick={() => navigate(user ? '/profile' : '/signup')}
+            className="bg-green-400 cursor-pointer text-black font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:bg-yellow-500"
           >
-            Get Started
+            {user ? `Welcome, ${user.name}!` : "Get Started"}
           </button>
-
+        </div>
+      </section>
     </div>
-      </section >
-    </div >
   );
 };
 

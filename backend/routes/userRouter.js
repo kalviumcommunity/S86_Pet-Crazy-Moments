@@ -1,33 +1,32 @@
 const express = require("express");
-const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const userSchema = require("../Models/userSchema");
+const User = require("../models/userSchema");
+
+const router = express.Router();
 
 // User Login
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
-
         if (!email || !password) {
-            return res.status(400).json({ msg: "Please provide both email and password." });
+            return res.status(400).json({ msg: "Email and password are required." });
         }
 
-        const user = await userSchema.findOne({ email });
-        if (!user) {
+        const user = await User.findOne({ email });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({ msg: "Invalid email or password." });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ msg: "Invalid email or password." });
-        }
-
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
 
         res.json({ 
             token, 
-            user: { id: user._id, name: user.name, email: user.email, phonenumber: user.phonenumber }
+            user: { id: user._id, name: user.name, email: user.email, role: user.role }
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -35,39 +34,35 @@ router.post("/login", async (req, res) => {
     }
 });
 
-// User Signup Route
+// User Signup
 router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, phonenumber } = req.body;
 
         if (!name || !email || !password) {
-            return res.status(400).json({ msg: "All fields are required" });
+            return res.status(400).json({ msg: "All fields are required." });
         }
 
-        // Check if email already exists
-        const existingUser = await userSchema.findOne({ email });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ msg: "Email already exists" });
+            return res.status(400).json({ msg: "Email already exists." });
         }
 
-        // Hash the password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create new user
-        const newUser = new userSchema({ 
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ 
             name, 
             email, 
             password: hashedPassword, 
-            phonenumber 
+            phonenumber,
+            role: "user" // Default role is 'user'
         });
 
         await newUser.save();
-
-        return res.status(201).json({ msg: "User registered successfully" });
+        res.status(201).json({ msg: "User registered successfully" });
     } catch (error) {
-        console.error("Signup error:", error); // Log the error for debugging
-        res.status(500).json({ msg: "Internal Server Error", error: error.message });
+        console.error("Signup error:", error);
+        res.status(500).json({ msg: "Internal Server Error" });
     }
 });
+
 module.exports = router;

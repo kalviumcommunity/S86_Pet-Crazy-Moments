@@ -13,7 +13,7 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       setError("Please fill in all fields.");
       return;
     }
@@ -27,18 +27,17 @@ const Login = () => {
       });
 
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user)); // ✅ Store user info
-      navigate("/");
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      navigate(response.data.user.role === "admin" ? "/admin" : "/");
     } catch (err) {
       setError(err.response?.data?.msg || "Invalid login credentials.");
-      console.log(err);
     }
-};
-
+  };
 
   return (
     <div className="min-h-screen bg-gray-700 flex items-center justify-center">
-      <div className="flex  bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl w-full">
+      <div className="flex bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl w-full">
         <div className="shrink-0 md:block w-1/2 bg-blue-100">
           <img src={loginImage} alt="Login" className="w-full h-full object-center" />
         </div>
