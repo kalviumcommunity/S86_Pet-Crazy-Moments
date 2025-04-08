@@ -24,9 +24,14 @@ router.post("/login", async (req, res) => {
             { expiresIn: "1d" }
         );
 
-        res.json({ 
-            token, 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role }
+        res.json({
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -37,9 +42,9 @@ router.post("/login", async (req, res) => {
 // User Signup
 router.post("/signup", async (req, res) => {
     try {
-        const { name, email, password, phonenumber } = req.body;
+        const { name, email, password, phonenumber, gender, address } = req.body;
 
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !phonenumber || !gender || !address) {
             return res.status(400).json({ msg: "All fields are required." });
         }
 
@@ -49,12 +54,15 @@ router.post("/signup", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ 
-            name, 
-            email, 
-            password: hashedPassword, 
+
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
             phonenumber,
-            role: "user" // Default role is 'user'
+            gender,
+            address,
+            role: "user"
         });
 
         await newUser.save();
