@@ -1,3 +1,4 @@
+// userSchema.js
 const mongoose = require("mongoose");
 
 const userModel = new mongoose.Schema({
@@ -8,7 +9,7 @@ const userModel = new mongoose.Schema({
     gender: { type: String, required: false },
     address: { type: String, required: false },
     profilePic: { type: String, required: false },
-    role: { type: String, enum: ["user", "admin"], default: "user" } // Default role is 'user'
+    role: { type: String, enum: ["user", "admin"], default: "user" }
 });
 
 const userSchema = mongoose.model("user", userModel);

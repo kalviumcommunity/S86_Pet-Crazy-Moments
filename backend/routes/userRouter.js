@@ -1,3 +1,4 @@
+// userRouter.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -24,13 +25,13 @@ router.post("/login", async (req, res) => {
             { expiresIn: "1d" }
         );
 
-        res.json({
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
+        res.json({ 
+            token, 
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role 
             }
         });
     } catch (error) {
@@ -44,8 +45,8 @@ router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, phonenumber, gender, address } = req.body;
 
-        if (!name || !email || !password || !phonenumber || !gender || !address) {
-            return res.status(400).json({ msg: "All fields are required." });
+        if (!name || !email || !password) {
+            return res.status(400).json({ msg: "Name, email, and password are required." });
         }
 
         const existingUser = await User.findOne({ email });
@@ -54,15 +55,14 @@ router.post("/signup", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = new User({
-            name,
-            email,
-            password: hashedPassword,
+        const newUser = new User({ 
+            name, 
+            email, 
+            password: hashedPassword, 
             phonenumber,
             gender,
             address,
-            role: "user"
+            role: "user" 
         });
 
         await newUser.save();
@@ -70,6 +70,17 @@ router.post("/signup", async (req, res) => {
     } catch (error) {
         console.error("Signup error:", error);
         res.status(500).json({ msg: "Internal Server Error" });
+    }
+});
+
+// Get all users (basic info only)
+router.get("/", async (req, res) => {
+    try {
+      const users = await User.find({}, "_id name email"); 
+      res.json(users);
+    } catch (err) {
+      console.error("Fetch users error:", err);
+      res.status(500).json({ msg: "Internal Server Error" });
     }
 });
 
