@@ -151,7 +151,7 @@ const Admin = () => {
                                         type="text"
                                         value={newTitle}
                                         onChange={(e) => setNewTitle(e.target.value)}
-                                        className="flex-1 p-2 border rounded text-white"
+                                        className="flex-1 p-2 border rounded text-black"
                                     />
                                     <div className="flex justify-center">
                                         <button

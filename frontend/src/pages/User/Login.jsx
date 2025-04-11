@@ -1,39 +1,55 @@
+// Login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import loginImage from "../../assets/Pets with halloween costumes-amico.svg";
-import { validateEmail, validatePassword } from "../../utils/validation";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+// In Login.jsx, modify the handleSubmit function
 
-    const emailErr = validateEmail(email);
-    const passErr = validatePassword(password);
-    if (emailErr || passErr) {
-      setError(emailErr || passErr);
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const response = await axios.post("http://localhost:3000/users/login", {
-        email: email.trim(),
-        password
-      });
+  if (!email.trim() || !password) {
+    setError("Please fill in all fields.");
+    return;
+  }
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      navigate(response.data.user.role === "admin" ? "/admin" : "/");
-    } catch (err) {
-      setError(err.response?.data?.msg || "Invalid login credentials.");
-    }
-  };
+  try {
+    const response = await axios.post("http://localhost:3000/users/login", {
+      email: email.trim(),
+      password
+    }, {
+      headers: { "Content-Type": "application/json" }
+    });
+
+    // Store token separately and in user object
+    const token = response.data.token;
+    const userData = {
+      id: response.data.user.id,
+      name: response.data.user.name,
+      email: response.data.user.email,
+      role: response.data.user.role,
+      token: token // Important: include token in user object
+    };
+
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
+    
+    setUser(userData);
+    navigate(userData.role === "admin" ? "/admin" : "/");
+  } catch (err) {
+    setError(err.response?.data?.msg || "Invalid login credentials.");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-700 flex items-center justify-center">
@@ -44,16 +60,44 @@ const Login = () => {
 
         <div className="w-full md:w-1/2 p-8">
           <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Login</h2>
+
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 border rounded focus:outline-blue-500" />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border rounded focus:outline-blue-500" />
-            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Login</button>
+            <div>
+              <label htmlFor="email" className="block text-gray-700 font-medium mb-1">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2 border rounded focus:outline-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-gray-700 font-medium mb-1">Password</label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 border rounded focus:outline-blue-500"
+                required
+              />
+            </div>
+
+            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+              Login
+            </button>
           </form>
 
           <p className="text-center mt-4 text-gray-600">
-            Don’t have an account? <Link to="/signup" className="text-blue-600 hover:underline">Sign Up</Link>
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-600 hover:underline">Sign Up</Link>
           </p>
         </div>
       </div>

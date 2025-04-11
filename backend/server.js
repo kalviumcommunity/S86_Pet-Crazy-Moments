@@ -1,3 +1,4 @@
+// server.js
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -33,9 +34,28 @@ mongoose.connect(process.env.MONGODB_URI, {
         process.exit(1);
     });
 
+
+
+// Add this in server.js before your routes
+
+// Request logging middleware
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    if (req.headers.authorization) {
+      console.log('Auth header present');
+    }
+    next();
+  });    
+
 // Routes
 app.use("/users", userRouter);
 app.use("/media", mediaRouter);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: "Something went wrong!" });
+});
 
 // Start Server
 app.listen(PORT, () => {

@@ -14,7 +14,7 @@ const About = () => {
                     About Us
                 </h3>
                 <p className="text-gray-500 max-w-2xl mx-auto">
-                    We love pets as much as you do!
+                    We love pets as much as you do!  
                     <br />
                     Our platform lets you share, explore, and upload fun pet moments.
                 </p>
