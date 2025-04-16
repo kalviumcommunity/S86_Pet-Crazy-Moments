@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import {Home, Login, Signup, ImagePage, VideoPage, UploadPage, Admin} from './Routes.jsx';
+import UserEntityFilter from './components/UserEntityFilter.jsx';
 
 
 function App() {
@@ -7,6 +8,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/sqltest" element={<UserEntityFilter/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/image" element={<ImagePage />} />
