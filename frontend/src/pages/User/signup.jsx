@@ -46,7 +46,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-700 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-700 py-10 px-5 flex items-center justify-center">
       <div className="flex bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl w-full">
         <div className="hidden md:block w-1/2 bg-blue-100">
           <img src={gameImage} alt="Game" className="w-full h-full object-center" />
