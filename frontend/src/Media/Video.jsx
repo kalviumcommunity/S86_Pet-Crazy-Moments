@@ -6,7 +6,7 @@ const VideoPage = () => {
   const [videos, setVideos] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/media/video")
+    axios.get("https://s86-pet-crazy-moments.onrender.com/media/video")
       .then(response => setVideos(response.data))
       .catch(error => console.error(error));
   }, []);
@@ -56,7 +56,7 @@ const VideoPage = () => {
               {videoType === "file" && (
                 <video className="rounded-lg shadow-lg w-full" controls>
                   <source 
-                    src={`http://localhost:3000${video.url}`} 
+                    src={`https://s86-pet-crazy-moments.onrender.com/${video.url}`} 
                     type="video/mp4" 
                   />
                   Your browser does not support the video tag.

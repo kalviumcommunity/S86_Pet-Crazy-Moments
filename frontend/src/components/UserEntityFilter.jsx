@@ -10,7 +10,7 @@ export default function UserEntityFilter() {
     // Configure axios base URL for development
     useEffect(() => {
         // Set the baseURL to match your backend server
-        axios.defaults.baseURL = 'http://localhost:3000';
+        axios.defaults.baseURL = 'https://s86-pet-crazy-moments.onrender.com/';
     }, []);
 
     // Fetch all users when component mounts

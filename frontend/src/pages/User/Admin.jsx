@@ -28,8 +28,8 @@ const Admin = () => {
     const fetchMedia = async () => {
         try {
             const [imagesResponse, videosResponse] = await Promise.all([
-                axios.get("http://localhost:3000/media/image"),
-                axios.get("http://localhost:3000/media/video"),
+                axios.get("https://s86-pet-crazy-moments.onrender.com/media/image"),
+                axios.get("https://s86-pet-crazy-moments.onrender.com/media/video"),
             ]);
 
             setMedia([...imagesResponse.data, ...videosResponse.data]);
@@ -39,12 +39,17 @@ const Admin = () => {
             setError("Failed to load media. Please try again later.");
         }
     };
-
+    const getAuthHeader = () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        return user?.token ? { Authorization: `Bearer ${user.token}` } : {};
+    };
     const deleteMedia = async (id) => {
         if (!window.confirm("Are you sure you want to delete this media?")) return;
 
         try {
-            await axios.delete(`http://localhost:3000/media/${id}`);
+            await axios.delete(`https://s86-pet-crazy-moments.onrender.com/media/${id}`, {
+                headers: getAuthHeader()
+            });
             setMedia(media.filter((item) => item._id !== id));
         } catch (error) {
             console.error("Error deleting media:", error);
@@ -59,7 +64,14 @@ const Admin = () => {
         }
 
         try {
-            await axios.put(`http://localhost:3000/media/${id}`, { title: newTitle });
+            await axios.put(
+                `https://s86-pet-crazy-moments.onrender.com/media/${id}`,
+                { title: newTitle },
+                {
+                    headers: getAuthHeader()
+                }
+            );
+
             setMedia(
                 media.map((item) =>
                     item._id === id ? { ...item, title: newTitle } : item
@@ -91,7 +103,7 @@ const Admin = () => {
                     <div className="space-x-6 flex items-center">
                         <Link to="/" className="text-gray-200 text-lg font-medium hover:text-green-300 transition-all duration-300">
                             Home
-                        </Link>    
+                        </Link>
                     </div>
                 </div>
             </nav>
@@ -111,7 +123,7 @@ const Admin = () => {
                         <div className="flex justify-center">
                             {item.type === "image" ? (
                                 <img
-                                    src={item.url.startsWith("http") ? item.url : `http://localhost:3000${item.url}`}
+                                    src={item.url.startsWith("http") ? item.url : `https://s86-pet-crazy-moments.onrender.com${item.url}`}
                                     alt={item.title}
                                     className="w-32 h-24 object-contain rounded-lg"
                                 />
@@ -135,7 +147,7 @@ const Admin = () => {
                                 ></iframe>
                             ) : isDirectVideo(item.url) ? (
                                 <video
-                                    src={item.url.startsWith("http") ? item.url : `http://localhost:3000${item.url}`}
+                                    src={item.url.startsWith("http") ? item.url : `https://s86-pet-crazy-moments.onrender.com/${item.url}`}
                                     controls
                                     className="w-32 h-24 rounded-lg"
                                 />

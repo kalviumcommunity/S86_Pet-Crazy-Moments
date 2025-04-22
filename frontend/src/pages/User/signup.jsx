@@ -28,7 +28,7 @@ const Signup = () => {
     }
 
     try {
-      await axios.post("http://localhost:3000/users/signup", {
+      await axios.post("https://s86-pet-crazy-moments.onrender.com/users/signup", {
         name,
         email,
         password,

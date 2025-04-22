@@ -43,19 +43,15 @@ const UploadPage = () => {
         return;
       }
 
-      await axios.post("http://localhost:3000/media/upload", formData, {
+      await axios.post("https://s86-pet-crazy-moments.onrender.com/media/upload", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
 
-      alert("Upload successful!");
-      setTitle('');
-      setFile(null);
-      setUrl('');
-      setType('image');
-      navigate('/image');
+      // Redirect to appropriate page
+      navigate(`/${type}`);
     } catch (error) {
       console.error("Upload error:", error);
       alert(`Upload failed: ${error.response?.data?.message || error.message}`);
@@ -64,37 +60,39 @@ const UploadPage = () => {
     }
   };
 
+  const previewSource = file ? URL.createObjectURL(file) : url;
+
   return (
-    <div className="min-h-screen  bg-gradient-to-b from-gray-100 to-gray-200 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-8">
       <Navbar />
 
-      <div className="max-w-4xl pt-20 mx-auto">
-        {/* Header */}
+      <div className="max-w-2xl pt-20 mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-12">
           Upload & View Media
         </h1>
 
-        {/* Upload Form */}
         <div className="bg-white p-8 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-6">Upload Media</h2>
+          <h2 className="text-2xl font-semibold text-gray-700 mb-6 text-center">Upload Media</h2>
 
-          <input
-            ref={titleRef}
-            type="text"
-            placeholder="Enter Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full border border-gray-300 p-3 rounded-md mb-4"
-          />
+          <div className="flex gap-10">
+            <input
+              ref={titleRef}
+              type="text"
+              placeholder="Enter Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full border border-gray-300 p-3 rounded-md mb-4"
+            />
 
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="w-full border border-gray-300 p-3 rounded-md mb-4"
-          >
-            <option value="image">Image</option>
-            <option value="video">Video</option>
-          </select>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full border border-gray-300 p-3 rounded-md mb-4"
+            >
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
+          </div>
 
           <input
             type="file"
@@ -113,33 +111,44 @@ const UploadPage = () => {
             className="w-full border border-gray-300 p-3 rounded-md mb-4"
           />
 
-          {/* Preview */}
-          {(file || url) && (
-            <div className="mb-4">
-              {type === "image" ? (
+          {/* Live Preview */}
+          {(file || url) && previewSource && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">Preview</h2>
+              {type === 'image' ? (
                 <img
-                  src={file ? URL.createObjectURL(file) : url}
+                  src={previewSource}
                   alt="Preview"
-                  className="w-full h-48 object-cover rounded-md"
+                  className="w-full max-h-[500px] object-contain rounded-md"
                 />
               ) : (
-                <video controls className="w-full h-48 rounded-md">
-                  <source src={file ? URL.createObjectURL(file) : url} />
-                  Your browser does not support the video tag.
-                </video>
+                <>
+                  {/\.(mp4|webm|ogg)$/i.test(previewSource) ? (
+                    <video controls className="w-full max-h-[500px] rounded-md">
+                      <source src={previewSource} />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <iframe
+                      src={previewSource}
+                      title="Video Preview"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-[500px] rounded-md"
+                    />
+                  )}
+                </>
               )}
             </div>
           )}
 
-          {/* Upload Button */}
           <button
             onClick={handleUpload}
             disabled={isUploading}
-            className={`w-full px-6 py-3 text-white font-semibold rounded-md transition ${
-              isUploading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+            className={`w-full px-6 py-3 text-white font-semibold rounded-md transition ${isUploading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700'
+              }`}
           >
             {isUploading ? "Uploading..." : "Upload"}
           </button>

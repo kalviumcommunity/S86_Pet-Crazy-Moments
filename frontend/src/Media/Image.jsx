@@ -8,7 +8,7 @@ const fetchData = async (url, setState, errorMessage) => {
     const response = await axios.get(url);
     setState(response.data);
   } catch (error) {
-    console.error(errorMessage, error);
+    console.error(`${errorMessage} ${error?.response?.data?.message || error.message}`);
   }
 };
 
@@ -20,7 +20,7 @@ const ImagePage = () => {
   // Fetch all users on component mount
   useEffect(() => {
     fetchData(
-      "http://localhost:3000/users",
+      "https://s86-pet-crazy-moments.onrender.com/users",
       setUsers,
       "Error fetching users:"
     );
@@ -29,8 +29,8 @@ const ImagePage = () => {
   // Fetch images (all or filtered by user) on user selection change
   useEffect(() => {
     const url = selectedUser
-      ? `http://localhost:3000/media/type/image?user=${selectedUser}`
-      : "http://localhost:3000/media/type/image";
+      ? `https://s86-pet-crazy-moments.onrender.com/media/type/image?user=${selectedUser}`
+      : "https://s86-pet-crazy-moments.onrender.com/media/type/image";
 
     fetchData(url, setImages, "Error fetching images:");
   }, [selectedUser]);
@@ -40,7 +40,7 @@ const ImagePage = () => {
       {/* Navbar */}
       <Navbar />
 
-      {/* Flex Container for Title and Dropdown */}
+      {/* Title and Dropdown */}
       <div className="flex justify-between items-center mb-10 mt-20">
         <h1 className="text-4xl font-bold text-gray-800 tracking-wide">
           Image Gallery
@@ -53,7 +53,7 @@ const ImagePage = () => {
           <option value="">All Users</option>
           {users.map((user) => (
             <option key={user._id} value={user._id}>
-              {user.name}
+              {user?.name || "Unnamed User"}
             </option>
           ))}
         </select>
@@ -62,22 +62,22 @@ const ImagePage = () => {
       {/* Image Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {images.length > 0 ? (
-          images.map((image, index) => (
+          images.map(({ _id, url, title, uploadedAt }) => (
             <div
-              key={index}
+              key={_id}
               className="rounded-lg shadow-lg bg-white hover:shadow-2xl transform hover:scale-105 transition duration-300"
             >
               <img
-                src={image.url.startsWith("http") ? image.url : `http://localhost:3000${image.url}`}
+                src={url.startsWith("http") ? url : `https://s86-pet-crazy-moments.onrender.com${url}`}
                 className="rounded-t-lg w-full h-48 object-contain"
-                alt={image.title}
+                alt={title || "Uploaded image"}
               />
               <div className="p-4">
                 <h2 className="text-lg font-semibold text-gray-800 truncate">
-                  {image.title}
+                  {title || "Untitled"}
                 </h2>
                 <p className="text-sm text-gray-600">
-                  {new Date(image.uploadedAt).toLocaleDateString()}
+                  {uploadedAt ? new Date(uploadedAt).toLocaleDateString() : "Unknown date"}
                 </p>
               </div>
             </div>
