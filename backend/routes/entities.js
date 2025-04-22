@@ -1,8 +1,8 @@
 // routes/entities.js
 const express = require("express");
 const router = express.Router();
-const Entity = require("../models/Entity");
-const User = require("../models/User");
+const Entity = require("../Models/Entity");
+const User = require("../Models/User");
 
 // Debug endpoint to check what's happening
 router.get("/debug", (req, res) => {
