@@ -69,7 +69,7 @@ const ImagePage = () => {
             >
               <img
                 src={url.startsWith("http") ? url : `https://s86-pet-crazy-moments.onrender.com${url}`}
-                className="rounded-t-lg w-full h-48 object-contain"
+                className="rounded-t-lg w-full h-48 object-cover"
                 alt={title || "Uploaded image"}
               />
               <div className="p-4">
