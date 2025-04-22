@@ -16,7 +16,7 @@ const Showcase = () => {
     <div>
       <section
         id="Showcase"
-        className="flex flex-wrap gap-20 min-h-150 items-center justify-center text-center py-25 bg-gray-900 text-white"
+        className="flex flex-wrap gap-20 min-h-150 items-center justify-center text-center py-15 pt-25 md:py-25 bg-gray-900 text-white"
       >
         <div className="relative">
           <div className="p-5 rotate-3 bg-white w-80 shadow-2xl shadow-gray-400 ">
@@ -32,7 +32,7 @@ const Showcase = () => {
             />
           </div>
         </div>
-        <div>
+        <div className='mx-5 mt-3'>
           <h2 className="text-4xl font-extrabold mb-4"> Welcome to Pet Crazy Moments!</h2>
           <p className="text-lg mb-6">
             Share and discover adorable and funny pet moments.

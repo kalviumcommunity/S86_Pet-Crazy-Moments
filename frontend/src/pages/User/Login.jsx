@@ -45,16 +45,16 @@ const handleSubmit = async (e) => {
     localStorage.setItem("user", JSON.stringify(userData));
     
     setUser(userData);
-    navigate(userData.role === "admin" ? "/admin" : "/");
+    navigate(userData.role === "admin" ? "/" : "/");
   } catch (err) {
     setError(err.response?.data?.msg || "Invalid login credentials.");
   }
 };
 
   return (
-    <div className="min-h-screen bg-gray-700 flex items-center justify-center">
-      <div className="flex bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl w-full">
-        <div className="shrink-0 md:block w-1/2 bg-blue-100">
+    <div className="min-h-screen bg-gray-700 flex items-center py-10 px-5 justify-center">
+      <div className="flex flex-col justify-center  items-center md:flex-row bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl w-full">
+        <div className="shrink-0 hidden md:block w-1/2 bg-blue-100">
           <img src={loginImage} alt="Login" className="w-full h-full object-center" />
         </div>
 
