@@ -3,6 +3,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/userSchema");
+const auth = require("../middleware/auth.js"); // Import the auth middleware
 
 const router = express.Router();
 
@@ -30,7 +31,10 @@ router.post("/login", async (req, res) => {
             user: { 
                 id: user._id, 
                 name: user.name, 
-                email: user.email, 
+                email: user.email,
+                phonenumber: user.phonenumber,
+                gender: user.gender,
+                address: user.address,
                 role: user.role 
             }
         });
@@ -69,6 +73,63 @@ router.post("/signup", async (req, res) => {
         res.status(201).json({ msg: "User registered successfully" });
     } catch (error) {
         console.error("Signup error:", error);
+        res.status(500).json({ msg: "Internal Server Error" });
+    }
+});
+
+// Update user profile
+router.put("/update-profile", auth, async (req, res) => {
+    try {
+        const { name, phonenumber, gender, address } = req.body;
+        const userId = req.user.id;
+
+        // Find user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+
+        // Update the user fields
+        if (name) user.name = name;
+        if (phonenumber) user.phonenumber = phonenumber;
+        if (gender) user.gender = gender;
+        if (address) user.address = address;
+
+        // Save the updated user
+        await user.save();
+
+        // Return the updated user data
+        res.json({
+            msg: "Profile updated successfully",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                phonenumber: user.phonenumber,
+                gender: user.gender,
+                address: user.address,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error("Update profile error:", error);
+        res.status(500).json({ msg: "Internal Server Error" });
+    }
+});
+
+// Get user profile
+router.get("/profile", auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).select("-password");
+        
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+        
+        res.json(user);
+    } catch (error) {
+        console.error("Get profile error:", error);
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });

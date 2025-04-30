@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiMenu, FiX } from 'react-icons/fi';
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -29,39 +29,39 @@ const Navbar = () => {
     }
   };
 
+  const handleNavClick = (id) => {
+    if (location.pathname === "/") {
+      scrollToSection(id);
+    } else {
+      navigate("/", { state: { scrollTo: id } });
+    }
+  };
+
   return (
     <nav className="bg-gray-700 shadow-lg fixed top-0 left-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-wide">
           Pet<span className="text-green-300">Crazy</span>
         </h1>
-
-        {/* Mobile menu button */}
-        <div className="md:hidden">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl focus:outline-none">
-            {menuOpen ? <FiX /> : <FiMenu />}
-          </button>
-        </div>
-
-        {/* Desktop menu */}
-        <div className="hidden md:flex space-x-6 items-center">
-          <button onClick={() => scrollToSection("Showcase")} className="text-gray-200 hover:text-green-300 text-lg font-medium transition">
+        <div className="space-x-6 flex items-center">
+          <button onClick={() => scrollToSection("Showcase")} className="text-gray-200 text-lg font-medium hover:text-green-300 transition-all duration-300">
             Home
           </button>
-          <button onClick={() => scrollToSection("about")} className="text-gray-200 hover:text-green-300 text-lg font-medium transition">
+          <button
+            onClick={() => scrollToSection("about")}
+            className="text-gray-200 text-lg font-medium hover:text-green-300 transition-all duration-300"
+          >
             About
           </button>
-          <button onClick={() => scrollToSection("contact")} className="text-gray-200 hover:text-green-300 text-lg font-medium transition">
+          <button
+            onClick={() => scrollToSection("contact")}
+            className="text-gray-200 text-lg font-medium hover:text-green-300 transition-all duration-300"
+          >
             Contact
           </button>
           {user ? (
             <div className="flex items-center space-x-4">
               <span className="text-white font-medium">Welcome, {user.name}</span>
-              {user.role === "admin" && (
-                <Link to="/admin" className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
-                  Admin Panel
-                </Link>
-              )}
               <button
                 onClick={handleLogout}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
