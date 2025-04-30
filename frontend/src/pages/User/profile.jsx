@@ -66,6 +66,28 @@ const Profile = () => {
     }
   };
 
+  const fetchUpdatedUser = async () => {
+    try {
+      const response = await axios.get(
+        'https://s86-pet-crazy-moments.onrender.com/users/profile',
+        { headers: getAuthHeader() }
+      );
+      const updatedUser = response.data.user;
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setFormData({
+        name: updatedUser.name || '',
+        email: updatedUser.email || '',
+        phonenumber: updatedUser.phonenumber || '',
+        gender: updatedUser.gender || '',
+        address: updatedUser.address || ''
+      });
+    } catch (err) {
+      console.error('Error fetching updated user:', err);
+      setError('Failed to fetch updated profile details');
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -75,7 +97,7 @@ const Profile = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.put(
+      await axios.put(
         'https://s86-pet-crazy-moments.onrender.com/users/update-profile',
         {
           name: formData.name,
@@ -86,10 +108,7 @@ const Profile = () => {
         { headers: getAuthHeader() }
       );
 
-      const updatedUser = { ...user, ...response.data.user };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-
+      await fetchUpdatedUser();
       setUpdateSuccess(true);
       setTimeout(() => setUpdateSuccess(false), 3000);
       setIsEditing(false);
