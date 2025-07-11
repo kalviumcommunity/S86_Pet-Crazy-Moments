@@ -5,6 +5,7 @@ const User = require("../Models/userSchema");
 const auth = require("../middleware/auth.js");
 
 const router = express.Router();
+
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -40,6 +41,7 @@ router.post("/login", async (req, res) => {
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
+
 router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, phonenumber, gender, address } = req.body;
@@ -71,6 +73,7 @@ router.post("/signup", async (req, res) => {
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
+
 router.put("/update-profile", auth, async (req, res) => {
     try {
         const { name, phonenumber, gender, address } = req.body;
@@ -109,6 +112,7 @@ router.put("/update-profile", auth, async (req, res) => {
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
+
 router.get("/profile", auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -124,12 +128,92 @@ router.get("/profile", auth, async (req, res) => {
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
-router.get("/", async (req, res) => {
+
+// Get all users (for admin)
+router.get("/", auth, async (req, res) => {
     try {
-        const users = await User.find({}, "_id name email");
+        // Check if user is admin
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ msg: "Access denied. Admin only." });
+        }
+
+        const users = await User.find({}, "_id name email phonenumber gender address role createdAt")
+            .sort({ createdAt: -1 });
         res.json(users);
     } catch (err) {
         console.error("Fetch users error:", err);
+        res.status(500).json({ msg: "Internal Server Error" });
+    }
+});
+
+// Delete user (admin only)
+router.delete("/:userId", auth, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Check if user is admin
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ msg: "Access denied. Admin only." });
+        }
+
+        // Prevent admin from deleting themselves
+        if (req.user.id === userId) {
+            return res.status(400).json({ msg: "You cannot delete your own account." });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found." });
+        }
+
+        await User.findByIdAndDelete(userId);
+        res.json({ msg: "User deleted successfully." });
+    } catch (error) {
+        console.error("Delete user error:", error);
+        res.status(500).json({ msg: "Internal Server Error" });
+    }
+});
+
+// Update user role (admin only)
+router.put("/:userId/role", auth, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { role } = req.body;
+        
+        // Check if user is admin
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ msg: "Access denied. Admin only." });
+        }
+
+        // Validate role
+        if (!["user", "admin"].includes(role)) {
+            return res.status(400).json({ msg: "Invalid role. Must be 'user' or 'admin'." });
+        }
+
+        // Prevent admin from changing their own role
+        if (req.user.id === userId) {
+            return res.status(400).json({ msg: "You cannot change your own role." });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found." });
+        }
+
+        user.role = role;
+        await user.save();
+
+        res.json({ 
+            msg: "User role updated successfully.",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error("Update user role error:", error);
         res.status(500).json({ msg: "Internal Server Error" });
     }
 });
