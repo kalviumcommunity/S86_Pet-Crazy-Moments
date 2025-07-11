@@ -84,21 +84,21 @@ const Navbar = () => {
               {user.role === "admin" && (
                 <Link
                   to="/admin"
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                  className="bg-lime-500 text-white px-4 py-2 rounded hover:bg-lime-600 hover:text-black transition"
                 >
                   Admin Panel
                 </Link>
               )}
               <button
                 onClick={handleLogout}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                className="bg-red-500 cursor-pointer text-white px-4 py-2 rounded hover:bg-red-600 transition"
               >
                 Logout
               </button>
             </div>
           ) : (
             <div className="space-x-4">
-              <Link to="/login" className="bg-green-400 text-black px-4 py-2 rounded hover:bg-yellow-500 transition">
+              <Link to="/login" className="bg-green-400 text-black px-4 py-2 rounded hover:bg-green-500 transition">
                 Login
               </Link>
               <Link to="/signup" className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
@@ -128,13 +128,13 @@ const Navbar = () => {
               </p>
               <div className="flex justify-center gap-4 mt-2">
                 {user.role === "admin" && (
-                  <Link to="/admin" className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+                  <Link to="/admin" className="bg-lime-500 text-white px-4 py-2 rounded hover:bg-lime-600 transition">
                     Admin Panel
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
                 >
                   Logout
                 </button>

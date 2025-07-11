@@ -2,13 +2,23 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 
-// Utility function for fetching data
-const fetchData = async (url, setState, errorMessage, headers = {}) => {
+// Utility function for fetching data with authentication
+const fetchData = async (url, setState, errorMessage, requiresAuth = false) => {
   try {
+    const headers = {};
+    if (requiresAuth) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    
     const response = await axios.get(url, { headers });
     setState(response.data);
+    return true;
   } catch (error) {
     console.error(`${errorMessage} ${error?.response?.data?.message || error.message}`);
+    return false;
   }
 };
 
@@ -17,45 +27,50 @@ const ImagePage = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Get authentication token from localStorage
-  const getAuthToken = () => {
-    return localStorage.getItem('token');
-  };
-
-  // Extract unique users from images
-  const extractUsersFromImages = (imageData) => {
-    const uniqueUsers = [];
-    const seenUserIds = new Set();
-    
-    imageData.forEach(image => {
-      if (image.user && !seenUserIds.has(image.user._id)) {
-        seenUserIds.add(image.user._id);
-        uniqueUsers.push({
-          _id: image.user._id,
-          name: image.user.name || 'Unknown User'
-        });
+  // Check if current user is admin
+  const checkUserRole = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        // Decode JWT token to get user role
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.role === 'admin';
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        return false;
       }
-    });
-    
-    return uniqueUsers;
+    }
+    return false;
   };
 
-  // Fetch all images on component mount to get users
+  // Fetch users and images on component mount
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
         
-        // Fetch all images first to extract users
-        const response = await axios.get("https://s86-pet-crazy-moments.onrender.com/media/type/image");
-        const imageData = response.data;
+        // Check if user is admin
+        const adminStatus = checkUserRole();
+        setIsAdmin(adminStatus);
         
-        setImages(imageData);
+        // Fetch images for all users
+        await fetchData(
+          `${import.meta.env.VITE_BACKEND_URL}media/type/image`,
+          setImages,
+          "Error fetching images:"
+        );
         
-        // Extract unique users from images
-        const uniqueUsers = extractUsersFromImages(imageData);
-        setUsers(uniqueUsers);
+        // Only fetch users list if user is admin
+        if (adminStatus) {
+          await fetchData(
+            `${import.meta.env.VITE_BACKEND_URL}/users`,
+            setUsers,
+            "Error fetching users:",
+            true // requires authentication
+          );
+        }
         
       } catch (error) {
         console.error("Error fetching initial data:", error?.response?.data?.message || error.message);
@@ -67,20 +82,20 @@ const ImagePage = () => {
     fetchInitialData();
   }, []);
 
-  // Fetch filtered images when user selection changes
+  // Fetch filtered images when user selection changes (admin only)
   useEffect(() => {
-    if (selectedUser) {
-      const url = `https://s86-pet-crazy-moments.onrender.com/media/type/image?user=${selectedUser}`;
+    if (isAdmin && selectedUser) {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/media/type/image?user=${selectedUser}`;
       fetchData(url, setImages, "Error fetching filtered images:");
-    } else {
+    } else if (isAdmin && !selectedUser) {
       // If no user selected, fetch all images
       fetchData(
-        "https://s86-pet-crazy-moments.onrender.com/media/type/image",
+        `${import.meta.env.VITE_BACKEND_URL}/media/type/image`,
         setImages,
         "Error fetching all images:"
       );
     }
-  }, [selectedUser]);
+  }, [selectedUser, isAdmin]);
 
   if (loading) {
     return (
@@ -98,24 +113,40 @@ const ImagePage = () => {
       {/* Navbar */}
       <Navbar />
 
-      {/* Title and Dropdown */}
-      <div className="flex justify-between items-center mb-10 mt-20">
+      {/* Title and Dropdown (Admin Only) */}
+      <div className="flex flex-col lg:flex-row gap-5 lg:gap-0 justify-between items-center mb-10 mt-20">
         <h1 className="text-4xl font-bold text-gray-800 tracking-wide">
           Image Gallery
         </h1>
-        <select
-          className="px-4 py-2 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:shadow-lg transition-all duration-200"
-          value={selectedUser}
-          onChange={(e) => setSelectedUser(e.target.value)}
-        >
-          <option value="">All Users</option>
-          {users.map((user) => (
-            <option key={user._id} value={user._id}>
-              {user.name}
-            </option>
-          ))}
-        </select>
+        
+        {/* Show filter dropdown only for admin */}
+        {isAdmin && (
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600 font-medium">Filter by User:</span>
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:shadow-lg transition-all duration-200"
+              value={selectedUser}
+              onChange={(e) => setSelectedUser(e.target.value)}
+            >
+              <option value="">All Users</option>
+              {users.map((user) => (
+                <option key={user._id} value={user._id}>
+                  {user.name || "Unnamed User"}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
+
+      {/* Admin Badge */}
+      {isAdmin && (
+        <div className="mb-4">
+          <span className="inline-block bg-green-300/40 text-green-800 px-3 py-1 rounded-lg text-sm font-medium">
+            Admin View
+          </span>
+        </div>
+      )}
 
       {/* Image Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -126,7 +157,7 @@ const ImagePage = () => {
               className="rounded-lg shadow-lg bg-white hover:shadow-2xl transform hover:scale-105 transition duration-300"
             >
               <img
-                src={url.startsWith("http") ? url : `https://s86-pet-crazy-moments.onrender.com${url}`}
+                src={url.startsWith("http") ? url : `${import.meta.env.VITE_BACKEND_URL}${url}`}
                 className="rounded-t-lg w-full h-48 object-cover"
                 alt={title || "Uploaded image"}
               />
@@ -137,15 +168,20 @@ const ImagePage = () => {
                 <p className="text-sm text-gray-600">
                   {uploadedAt ? new Date(uploadedAt).toLocaleDateString() : "Unknown date"}
                 </p>
-                <p className="text-sm text-gray-500">
-                  By: {user?.name || "Unknown User"}
-                </p>
+                {/* Show user name only for admin */}
+                {isAdmin && (
+                  <p className="text-sm text-gray-500">
+                    By: {user?.name || "Unknown User"}
+                  </p>
+                )}
               </div>
             </div>
           ))
         ) : (
           <div className="col-span-full text-center py-12">
-            <p className="text-xl text-gray-600">No images found</p>
+            <p className="text-xl text-gray-600">
+              {isAdmin && selectedUser ? "No images found for selected user" : "No images found"}
+            </p>
           </div>
         )}
       </div>

@@ -49,7 +49,7 @@ const Admin = () => {
     const fetchUserMedia = async (userId) => {
         setLoading(true);
         try {
-            const response = await axios.get(`https://s86-pet-crazy-moments.onrender.com/media/user/${userId}`, {
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/media/user/${userId}`, {
                 headers: getAuthHeader(),
             });
             setMedia(response.data);
@@ -64,7 +64,7 @@ const Admin = () => {
 
     const fetchAllUsers = async () => {
         try {
-            const response = await axios.get("https://s86-pet-crazy-moments.onrender.com/users", {
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/users`, {
                 headers: getAuthHeader(),
             });
             setUsers(response.data);
@@ -82,7 +82,7 @@ const Admin = () => {
     const deleteMedia = async (id) => {
         if (!window.confirm("Are you sure you want to delete this media?")) return;
         try {
-            await axios.delete(`https://s86-pet-crazy-moments.onrender.com/media/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/media/${id}`, {
                 headers: getAuthHeader(),
             });
             setMedia(media.filter((item) => item._id !== id));
@@ -95,7 +95,7 @@ const Admin = () => {
     const deleteUser = async (userId) => {
         if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
         try {
-            await axios.delete(`https://s86-pet-crazy-moments.onrender.com/users/${userId}`, {
+            await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
                 headers: getAuthHeader(),
             });
             setUsers(users.filter((u) => u._id !== userId));
@@ -112,7 +112,7 @@ const Admin = () => {
         if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
         
         try {
-            await axios.put(`https://s86-pet-crazy-moments.onrender.com/users/${userId}/role`, 
+            await axios.put(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/role`, 
                 { role: newRole }, 
                 { headers: getAuthHeader() }
             );
@@ -127,7 +127,7 @@ const Admin = () => {
         if (!newTitle.trim()) return alert("Title cannot be empty!");
         try {
             await axios.put(
-                `https://s86-pet-crazy-moments.onrender.com/media/${id}`,
+                `${import.meta.env.VITE_BACKEND_URL}/media/${id}`,
                 { title: newTitle },
                 { headers: getAuthHeader() }
             );
@@ -147,7 +147,7 @@ const Admin = () => {
     const getVimeoEmbedUrl = (url) => `https://player.vimeo.com/video/${url.split("/").pop()}`;
 
     const renderMediaPreview = (item) => {
-        const src = item.url.startsWith("http") ? item.url : `https://s86-pet-crazy-moments.onrender.com${item.url}`;
+        const src = item.url.startsWith("http") ? item.url : `${import.meta.env.VITE_BACKEND_URL}${item.url}`;
         
         if (item.type === "image") {
             return (

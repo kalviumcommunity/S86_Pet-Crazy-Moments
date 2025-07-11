@@ -5,36 +5,81 @@ import axios from "axios";
 import gameImage from "../../assets/Good doggy-amico.svg";
 
 const Signup = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [gender, setGender] = useState("");
-  const [address, setAddress] = useState("");
-  const [phonenumber, setPhoneNumber] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    gender: "",
+    address: "",
+    phonenumber: ""
+  });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleGenderChange = (e) => {
-    setGender(e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      gender: e.target.value
+    }));
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError("Name is required");
+      return false;
+    }
+    if (!formData.email.trim()) {
+      setError("Email is required");
+      return false;
+    }
+    if (!formData.password) {
+      setError("Password is required");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return false;
+    }
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    if (formData.phonenumber && !/^\d{10}$/.test(formData.phonenumber.replace(/\D/g, ''))) {
+      setError("Phone number must be 10 digits");
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    if (!name || !email || !password) {
-      setError("Name, email and password are required");
+    if (!validateForm()) {
+      setLoading(false);
       return;
     }
 
     try {
-      await axios.post("https://s86-pet-crazy-moments.onrender.com/users/signup", {
-        name,
-        email,
-        password,
-        gender,
-        address,
-        phonenumber
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signup`, {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        gender: formData.gender,
+        address: formData.address.trim(),
+        phonenumber: formData.phonenumber.trim()
+      }, {
+        headers: { "Content-Type": "application/json" }
       });
 
       alert("Account created successfully! Please login.");
@@ -42,6 +87,8 @@ const Signup = () => {
     } catch (err) {
       console.error("Signup error:", err);
       setError(err.response?.data?.msg || "Error signing up, please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,47 +107,54 @@ const Signup = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
-                Full Name
+                Full Name *
               </label>
               <input
                 id="name"
+                name="name"
                 type="text"
                 placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={handleInputChange}
                 className="w-full p-2 border rounded focus:outline-blue-500"
                 required
+                disabled={loading}
               />
             </div>
 
             <div className="flex gap-4">
               <div className="w-1/2">
                 <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
-                  Email
+                  Email *
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formData.email}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded focus:outline-blue-500"
                   required
+                  disabled={loading}
                 />
               </div>
 
               <div className="w-1/2">
                 <label htmlFor="password" className="block text-gray-700 font-medium mb-1">
-                  Password
+                  Password *
                 </label>
                 <input
                   id="password"
+                  name="password"
                   type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password (min 6 chars)"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded focus:outline-blue-500"
                   required
+                  disabled={loading}
+                  minLength={6}
                 />
               </div>
             </div>
@@ -108,16 +162,18 @@ const Signup = () => {
             <div>
               <label className="block text-gray-700 font-medium mb-1">Gender</label>
               <div className="flex gap-4">
-                {["Male", "Female", "Other"].map((option) => (
+                {["male", "female", "other"].map((option) => (
                   <label key={option} className="flex items-center">
                     <input
                       type="radio"
+                      name="gender"
                       value={option}
-                      checked={gender === option}
+                      checked={formData.gender === option}
                       onChange={handleGenderChange}
                       className="mr-2"
+                      disabled={loading}
                     />
-                    {option}
+                    {option.charAt(0).toUpperCase() + option.slice(1)}
                   </label>
                 ))}
               </div>
@@ -127,13 +183,15 @@ const Signup = () => {
               <label htmlFor="address" className="block text-gray-700 font-medium mb-1">
                 Address
               </label>
-              <input
+              <textarea
                 id="address"
-                type="text"
+                name="address"
                 placeholder="Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                value={formData.address}
+                onChange={handleInputChange}
                 className="w-full p-2 border rounded focus:outline-blue-500"
+                rows="3"
+                disabled={loading}
               />
             </div>
 
@@ -143,16 +201,22 @@ const Signup = () => {
               </label>
               <input
                 id="phonenumber"
-                type="text"
+                name="phonenumber"
+                type="tel"
                 placeholder="Phone Number"
-                value={phonenumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                value={formData.phonenumber}
+                onChange={handleInputChange}
                 className="w-full p-2 border rounded focus:outline-blue-500"
+                disabled={loading}
               />
             </div>
 
-            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
-              Sign Up
+            <button 
+              type="submit" 
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Creating Account..." : "Sign Up"}
             </button>
           </form>
 
