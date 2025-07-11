@@ -7,7 +7,6 @@ const fs = require("fs");
 
 const userRouter = require("./routes/userRouter");
 const mediaRouter = require("./routes/mediaRouter");
-const entityRoutes = require('./routes/entities');
 
 
 const app = express();
@@ -43,7 +42,6 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use("/api", entityRoutes);
 app.use("/users", userRouter);
 app.use("/media", mediaRouter);
 
