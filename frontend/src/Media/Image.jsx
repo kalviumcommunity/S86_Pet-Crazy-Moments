@@ -3,9 +3,9 @@ import axios from 'axios';
 import Navbar from './Navbar';
 
 // Utility function for fetching data
-const fetchData = async (url, setState, errorMessage) => {
+const fetchData = async (url, setState, errorMessage, headers = {}) => {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, { headers });
     setState(response.data);
   } catch (error) {
     console.error(`${errorMessage} ${error?.response?.data?.message || error.message}`);
@@ -16,24 +16,82 @@ const ImagePage = () => {
   const [images, setImages] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // Fetch all users on component mount
+  // Get authentication token from localStorage
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  // Extract unique users from images
+  const extractUsersFromImages = (imageData) => {
+    const uniqueUsers = [];
+    const seenUserIds = new Set();
+    
+    imageData.forEach(image => {
+      if (image.user && !seenUserIds.has(image.user._id)) {
+        seenUserIds.add(image.user._id);
+        uniqueUsers.push({
+          _id: image.user._id,
+          name: image.user.name || 'Unknown User'
+        });
+      }
+    });
+    
+    return uniqueUsers;
+  };
+
+  // Fetch all images on component mount to get users
   useEffect(() => {
-    fetchData(
-      "https://s86-pet-crazy-moments.onrender.com/users",
-      setUsers,
-      "Error fetching users:"
-    );
+    const fetchInitialData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch all images first to extract users
+        const response = await axios.get("https://s86-pet-crazy-moments.onrender.com/media/type/image");
+        const imageData = response.data;
+        
+        setImages(imageData);
+        
+        // Extract unique users from images
+        const uniqueUsers = extractUsersFromImages(imageData);
+        setUsers(uniqueUsers);
+        
+      } catch (error) {
+        console.error("Error fetching initial data:", error?.response?.data?.message || error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
   }, []);
 
-  // Fetch images (all or filtered by user) on user selection change
+  // Fetch filtered images when user selection changes
   useEffect(() => {
-    const url = selectedUser
-      ? `https://s86-pet-crazy-moments.onrender.com/media/type/image?user=${selectedUser}`
-      : "https://s86-pet-crazy-moments.onrender.com/media/type/image";
-
-    fetchData(url, setImages, "Error fetching images:");
+    if (selectedUser) {
+      const url = `https://s86-pet-crazy-moments.onrender.com/media/type/image?user=${selectedUser}`;
+      fetchData(url, setImages, "Error fetching filtered images:");
+    } else {
+      // If no user selected, fetch all images
+      fetchData(
+        "https://s86-pet-crazy-moments.onrender.com/media/type/image",
+        setImages,
+        "Error fetching all images:"
+      );
+    }
   }, [selectedUser]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-200 p-6">
+        <Navbar />
+        <div className="flex justify-center items-center h-64">
+          <p className="text-xl text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-200 p-6">
@@ -53,7 +111,7 @@ const ImagePage = () => {
           <option value="">All Users</option>
           {users.map((user) => (
             <option key={user._id} value={user._id}>
-              {user?.name || "Unnamed User"}
+              {user.name}
             </option>
           ))}
         </select>
@@ -62,7 +120,7 @@ const ImagePage = () => {
       {/* Image Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {images.length > 0 ? (
-          images.map(({ _id, url, title, uploadedAt }) => (
+          images.map(({ _id, url, title, uploadedAt, user }) => (
             <div
               key={_id}
               className="rounded-lg shadow-lg bg-white hover:shadow-2xl transform hover:scale-105 transition duration-300"
@@ -78,6 +136,9 @@ const ImagePage = () => {
                 </h2>
                 <p className="text-sm text-gray-600">
                   {uploadedAt ? new Date(uploadedAt).toLocaleDateString() : "Unknown date"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  By: {user?.name || "Unknown User"}
                 </p>
               </div>
             </div>
